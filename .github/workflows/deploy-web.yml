@@ -1,4 +1,4 @@
-name: deploy
+name: Deploy CHelper-Web to my server
 
 on:
   push:
@@ -48,4 +48,4 @@ jobs:
           SOURCE: "CHelper-Web/dist/"
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
-          TARGET: ${{ secrets.TARGET }}
+          TARGET: ${{ secrets.CHELPER_WEB_TARGET }}
