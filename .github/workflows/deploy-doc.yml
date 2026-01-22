@@ -1,16 +1,8 @@
-name: Deploy CHelper-Web to my server
+name: Deploy CHelper-Doc to my server
 
 on:
   push:
-    branches: [ "master" ]
-    paths:
-      - '.github/workflows/deploy-web.yml'
-      - 'CHelper-Web/**'
-  pull_request:
-    branches: [ "master" ]
-    paths:
-      - '.github/workflows/deploy-web.yml'
-      - 'CHelper-Web/**'
+    branches: ['main']
 
 jobs:
   build:
@@ -30,22 +22,22 @@ jobs:
         uses: actions/setup-node@v6
         with:
           cache: 'pnpm'
-          cache-dependency-path: 'CHelper-Web/pnpm-lock.yaml'
+          cache-dependency-path: 'CHelper-Doc/pnpm-lock.yaml'
 
       - name: Install dependencies
-        working-directory: ${{ github.workspace }}/CHelper-Web
+        working-directory: ${{ github.workspace }}/CHelper-Doc
         run: pnpm install
 
       - name: Build
-        working-directory: ${{ github.workspace }}/CHelper-Web
-        run: npx vite build --base=/chelper/ --mode my_server
+        working-directory: ${{ github.workspace }}/CHelper-Doc
+        run: npx vitepress build --base=/chelper_doc/
   
       - name: Deploy
         uses: easingthemes/ssh-deploy@main
         env:
           SSH_PRIVATE_KEY: ${{ secrets.ACCESS_TOKEN }}
           ARGS: "-avz --delete"
-          SOURCE: "CHelper-Web/dist/"
+          SOURCE: "CHelper-Doc/.vitepress/dist/"
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           TARGET: ${{ secrets.CHELPER_WEB_TARGET }}
