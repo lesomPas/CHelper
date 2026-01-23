@@ -41,6 +41,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
@@ -529,10 +530,10 @@ fun CompletionScreen(
                             hint = hintStr
                             maxLines = 1
                             isSingleLine = true
-                            setTextColor(textMain.value.toInt())
-                            setHintTextColor(textSecondary.value.toInt())
-                            setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+                            setTextColor(textMain.toArgb())
+                            setHintTextColor(textSecondary.toArgb())
                             setTheme(if (theme == CHelperTheme.Theme.Light) Theme.THEME_DAY else Theme.THEME_NIGHT)
+                            setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
                             setListener({ str ->
                                 var selectionStart = selectionStart
                                 var selectionEnd = selectionEnd
@@ -570,9 +571,8 @@ fun CompletionScreen(
                         ) {
                             view.selectedString = SelectedString(str, selectionStart, selectionEnd)
                         }
-                        if (viewModel.syntaxHighlightTokens == null || viewModel.syntaxHighlightTokens!!.size == viewModel.command.text.length) {
-                            view.setColors(viewModel.syntaxHighlightTokens)
-                        }
+                        view.setErrorReasons(viewModel.errorReasons)
+                        view.setColors(viewModel.syntaxHighlightTokens)
                     }
                 )
                 Icon(

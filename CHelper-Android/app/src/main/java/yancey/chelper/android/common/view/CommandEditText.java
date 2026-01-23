@@ -64,6 +64,7 @@ public class CommandEditText extends AppCompatEditText {
     private Theme theme;
     private Paint errorReasonPaint;
     private int errorReasonOffsetY;
+    private int[] lastTokens;
 
     public CommandEditText(Context context) {
         super(context);
@@ -209,10 +210,14 @@ public class CommandEditText extends AppCompatEditText {
      * @param tokens 每个字符的类型
      */
     public void setColors(@Nullable int[] tokens) {
-        Editable text = this.getText();
-        if (text == null) {
+        if (tokens == lastTokens) {
             return;
         }
+        Editable text = this.getText();
+        if (text == null || (tokens != null && tokens.length != 0 && text.length() != tokens.length)) {
+            return;
+        }
+        lastTokens = tokens;
         boolean isSpannableStringBuilder;
         SpannableStringBuilder spannableStringBuilder;
         if (text instanceof SpannableStringBuilder spannableStringBuilder0) {

@@ -75,7 +75,7 @@ fun HistoryScreen(viewModel: HistoryViewModel = viewModel()) {
                     .clip(RoundedCornerShape(10.dp))
                     .background(color = CHelperTheme.colors.backgroundComponent)
             ) {
-                items(viewModel.contents!!) {
+                items(viewModel.contents) {
                     Row(
                         modifier = Modifier
                             .padding(20.dp, 10.dp)
