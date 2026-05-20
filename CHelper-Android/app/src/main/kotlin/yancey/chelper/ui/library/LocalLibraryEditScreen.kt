@@ -296,12 +296,15 @@ fun LocalLibraryEditScreen(viewModel: LocalLibraryEditViewModel = viewModel(), i
                 viewModel.autoSync -> "保存并同步到云端"
                 else -> stringResource(R.string.layout_library_edit_save)
             }
+            // Compose Lint 不让在 onClick 闭包里走 context.getString —— Configuration 变更
+            // 不会触发 LocalContext 重读，会拿到旧值。提前在 Composable 上下文里抓一份字符串
+            val emptyErrorText = stringResource(R.string.upload_empty_error)
             Button(
                 text = saveLabel,
                 onClick = {
                     if (viewModel.isSyncing) return@Button
                     if (viewModel.name.text.isBlank() || viewModel.commands.text.isBlank()) {
-                        Toaster.show(context.getString(R.string.upload_empty_error))
+                        Toaster.show(emptyErrorText)
                         return@Button
                     }
                     saveLocalLibrary(
