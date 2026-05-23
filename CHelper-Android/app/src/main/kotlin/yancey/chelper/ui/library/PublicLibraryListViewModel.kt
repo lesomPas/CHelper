@@ -132,7 +132,9 @@ class PublicLibraryListViewModel : ViewModel() {
             try {
                 val response = withContext(Dispatchers.IO) {
                     if (isRecommend && search.isNullOrBlank()) {
-                        ServiceManager.COMMAND_LAB_PUBLIC_SERVICE.getRecommendedLibrary(limit = 15, pageNum = currentPage, pageSize = 20)
+                        // 推荐接口本身就是随机抽样，不传 pageNum/pageSize；
+                        // loadMore 等同于"再洗一批"追加，避免分页带来的重复
+                        ServiceManager.COMMAND_LAB_PUBLIC_SERVICE.getRecommendedLibrary(limit = 15)
                     } else {
                         ServiceManager.COMMAND_LAB_PUBLIC_SERVICE.getFunctions(
                             pageNum = currentPage,
@@ -145,17 +147,25 @@ class PublicLibraryListViewModel : ViewModel() {
                 if (response.isSuccess() && response.data != null) {
                     val data = response.data!!
                     val functions = data.functions?.filterNotNull() ?: emptyList()
-                    libraries.addAll(functions)
+                    // 推荐接口随机抽样，loadMore 拉来的新批次很可能与已有项 id 重复；
+                    // 不去重 LazyColumn 会撞 key 抛 IllegalArgumentException 闪退。
+                    // 同时兜底单次响应内自带重复的情况。
+                    val seenIds = libraries.mapNotNullTo(HashSet()) { it.id }
+                    val deduped = functions.filter { fn ->
+                        val id = fn.id ?: return@filter true
+                        seenIds.add(id)
+                    }
+                    libraries.addAll(deduped)
 
                     val total = data.totalCount ?: 0
                     val size = data.perPage ?: 20
                     // Calculate total pages: ceil(total / size)
                     totalPages = if (size > 0) (total + size - 1) / size else 1
-                    
-                    // 对于猜你喜欢模式：如果后端没有返回正确的 total 限制（纯随机），
-                    // 返回条数不为空就允许继续加载下页，否则按照普通模式页数走
+
+                    // 推荐模式以"去重后还能添加"作为继续加载的依据：
+                    // 若某次洗出来全是已见过的项，说明库存基本耗尽，停止 loadMore
                     hasMore = if (isRecommend) {
-                        functions.isNotEmpty()
+                        deduped.isNotEmpty()
                     } else {
                         currentPage < totalPages
                     }
@@ -172,7 +182,10 @@ class PublicLibraryListViewModel : ViewModel() {
 
     fun loadMore(isRecommend: Boolean = false) {
         if (!hasMore || isLoading) return
-        currentPage++
+        // 推荐接口不分页，直接再洗一批追加；普通列表才推进页码
+        if (!isRecommend) {
+            currentPage++
+        }
         loadFunctions(null, resetPage = false, isRecommend = isRecommend)
     }
 

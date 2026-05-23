@@ -38,6 +38,8 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
@@ -53,6 +55,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -153,6 +156,18 @@ fun PublicLibraryListScreen(
         snapshotFlow { shouldLoadMore.value }.collect { if (it) viewModel.loadMore(isRecommend = viewModel.isRecommendMode) }
     }
 
+    // 全屏共用的"刷新图标旋转角度"。infiniteRepeatable 一启动就常驻，
+    // 在 isLoading 期间通过 Modifier.rotate 应用到对应图标上即可
+    val spinTransition = rememberInfiniteTransition(label = "refreshSpin")
+    val spinAngle by spinTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(900, easing = LinearEasing)
+        ),
+        label = "refreshSpinAngle"
+    )
+
     RootViewWithHeaderAndCopyright(
         title = stringResource(R.string.layout_library_list_title_public),
         // tab 模式下也展示返回箭头，但走 navController.popBackStack（回到上一个路由），
@@ -166,7 +181,8 @@ fun PublicLibraryListScreen(
                     Modifier
                         .clickable { viewModel.refresh(isRecommend = viewModel.isRecommendMode) }
                         .padding(5.dp)
-                        .size(24.dp),
+                        .size(24.dp)
+                        .rotate(if (viewModel.isLoading) spinAngle else 0f),
                 contentDescription = "刷新"
             )
         }
@@ -274,7 +290,9 @@ fun PublicLibraryListScreen(
                                 Image(
                                     painter = painterResource(R.drawable.refresh),
                                     contentDescription = "刷新猜你喜欢",
-                                    modifier = Modifier.size(12.dp), 
+                                    modifier = Modifier
+                                        .size(12.dp)
+                                        .rotate(if (viewModel.isLoading) spinAngle else 0f),
                                     colorFilter = ColorFilter.tint(androidx.compose.ui.graphics.Color.White)
                                 )
                             }
@@ -370,13 +388,15 @@ fun PublicLibraryListScreen(
                         // 加载更多指示器
                         if (viewModel.isLoading) {
                             item {
-                                // 脉冲动画：透明度在 0.3f ~ 1f 之间循环
+                                // 呼吸式脉冲：Reverse 保证 0.3→1→0.3 平滑往返，
+                                // 默认的 Restart 会让 alpha 从 1 瞬间跳回 0.3，视觉上一闪一闪
                                 val infiniteTransition = rememberInfiniteTransition(label = "loading")
                                 val alpha by infiniteTransition.animateFloat(
                                     initialValue = 0.3f,
                                     targetValue = 1f,
                                     animationSpec = infiniteRepeatable(
-                                        animation = tween(800)
+                                        animation = tween(800, easing = LinearEasing),
+                                        repeatMode = RepeatMode.Reverse
                                     ),
                                     label = "loadingAlpha"
                                 )
