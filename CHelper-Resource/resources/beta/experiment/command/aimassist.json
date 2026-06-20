@@ -87,11 +87,11 @@
     "ast": [
         ["player", "clear", "set"],
         ["clear", "LF"],
-        ["set", "xAngle", "LF"],
-        ["xAngle", "yAngle", "LF"],
-        ["yAngle", "maxDistance", "LF"],
-        ["maxDistance", "targetMode", "LF"],
-        ["targetMode", "presetId", "LF"],
-        ["presetId", "LF"]
+        ["set", "x Angle", "LF"],
+        ["x Angle", "y Angle", "LF"],
+        ["y Angle", "max Distance", "LF"],
+        ["max Distance", "targetMode", "LF"],
+        ["targetMode", "<preset Id>", "LF"],
+        ["<preset Id>", "LF"]
     ]
 }
