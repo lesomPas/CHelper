@@ -4,17 +4,40 @@
     ],
     "description": "管理玩家及其他实体上的状态效果",
     "start": [
-        "player"
+        "<player: target>"
     ],
     "node": [
         {
             "type": "TARGET_SELECTOR",
-            "id": "player",
+            "id": "<player: target>",
             "description": "目标实体",
             "isOnlyOne": false,
             "isMustPlayer": false,
             "isMustNPC": false,
             "isWildcard": false
+        },
+        {
+            "type": "NORMAL_ID",
+            "id": "<effect: Effect>",
+            "brief": "效果",
+            "description": "需要给予的效果",
+            "key": "effect",
+            "ignoreError": true
+        },
+        {
+            "type": "INTEGER",
+            "id": "[seconds: int]",
+            "brief": "时长",
+            "description": "以秒为单位指定效果时长"
+        },
+        {
+            "type": "TEXT",
+            "id": "infinite",
+            "description": "无限时长",
+            "data": {
+                "name": "infinite",
+                "description": "无限时长"
+            }
         },
         {
             "type": "TEXT",
@@ -27,58 +50,35 @@
         },
         {
             "type": "NORMAL_ID",
-            "id": "effect",
+            "id": "[effect: Effect]",
             "brief": "效果",
             "description": "需要给予的效果",
-            "ignoreError": true,
-            "key": "effect"
+            "key": "effect",
+            "ignoreError": true
         },
         {
             "type": "INTEGER",
-            "id": "seconds",
-            "brief": "时长",
-            "description": "以秒为单位指定效果时长"
-        },
-        {
-            "type": "INTEGER",
-            "id": "amplifier",
+            "id": "[amplifier: int]",
             "brief": "等级",
             "description": "效果的额外等级"
         },
         {
             "type": "BOOLEAN",
-            "id": "hideParticles",
+            "id": "[hideParticles: Boolean]",
             "brief": "是否隐藏药水粒子",
             "description": "是否隐藏药水粒子",
             "descriptionTrue": "隐藏药水粒子",
             "descriptionFalse": "显示药水粒子"
-        },
-        {
-            "type": "TEXT",
-            "id": "infinite",
-            "description": "无限时长",
-            "data": {
-                "name": "infinite",
-                "description": "无限时长"
-            }
-        },
-        {
-            "type": "NORMAL_ID",
-            "id": "clear_effect",
-            "brief": "效果",
-            "description": "需要移除的效果",
-            "ignoreError": true,
-            "key": "effect"
         }
     ],
     "ast": [
-        ["player", "clear", "effect"],
-        ["clear", "clear_effect", "LF"],
-        ["clear_effect", "LF"],
-        ["effect", "seconds", "infinite", "LF"],
-        ["seconds", "amplifier", "LF"],
-        ["amplifier", "hideParticles", "LF"],
-        ["hideParticles", "LF"],
-        ["infinite", "LF", "amplifier"]
+        ["<player: target>", "<effect: Effect>", "clear"],
+        ["<effect: Effect>", "[seconds: int]", "infinite", "LF"],
+        ["[seconds: int]", "[amplifier: int]", "LF"],
+        ["infinite", "[amplifier: int]", "LF"],
+        ["clear", "[effect: Effect]", "LF"],
+        ["[effect: Effect]", "LF"],
+        ["[amplifier: int]", "[hideParticles: Boolean]", "LF"],
+        ["[hideParticles: Boolean]", "LF"]
     ]
 }
